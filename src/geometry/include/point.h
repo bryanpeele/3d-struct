@@ -36,6 +36,22 @@ class Point {
     }
   }
 
+  // overloaded < operator
+  bool operator <(const Point &other_point) const {
+    // TODO test dimension.
+    if(x() < other_point.x()) {
+      return true;
+    } else if (x() == other_point.x()) {
+      if (y() < other_point.y()) {
+        return true;
+      } else if (y() == other_point.y() && N > 2 && z() < other_point.z()) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
  private:
   Eigen::Matrix<T, N, 1> coordinate_;
 };

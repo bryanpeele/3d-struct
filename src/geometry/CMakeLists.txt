@@ -1,6 +1,8 @@
 add_library(geometry SHARED
   src/point.cpp
   src/edge.cpp
+  src/graph.cpp
+  src/structify.cpp
 )
 
 target_link_libraries(geometry
