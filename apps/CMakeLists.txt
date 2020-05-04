@@ -1,1 +1,2 @@
 add_subdirectory(hello_world)
+add_subdirectory(open3d_example)

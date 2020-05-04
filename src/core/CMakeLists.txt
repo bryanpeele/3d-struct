@@ -1,8 +1,8 @@
-add_library(core
+add_library(core SHARED
   src/util.cpp
 )
 
-target_link_libraries(core
+target_link_libraries(core PUBLIC
   Eigen3::Eigen
 )
 
@@ -13,5 +13,5 @@ target_include_directories(core PUBLIC
 if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
   target_compile_options(core PRIVATE -O3 -Wall -Wextra -Werror)
 elseif(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-    target_compile_options(core PRIVATE -Wall -Wextra)
+  target_compile_options(core PRIVATE -Wall -Wextra)
 endif()
