@@ -23,9 +23,9 @@ if(ENABLE_CPPLINT)
 endif()
 
 hunter_add_package(Eigen)
-find_package (Eigen3 3.3 REQUIRED NO_MODULE)
+find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
-find_package(Open3D 0.9.0.0 REQUIRED)
+find_package(Open3D 0.9.0.0 REQUIRED CONFIG)
 
 include(GoogleTest)
 enable_testing()
