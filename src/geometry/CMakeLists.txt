@@ -1,7 +1,7 @@
 add_library(geometry SHARED
-  src/point.cpp
-  src/edge.cpp
   src/graph.cpp
+  src/math_util.cpp
+  src/point.cpp
   src/structify.cpp
 )
 
@@ -14,7 +14,7 @@ target_include_directories(geometry PUBLIC
 )
 
 if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
-  target_compile_options(geometry PRIVATE -O3 -Wall -Wextra -Werror)
+  target_compile_options(geometry PRIVATE -O3 -Wall -Wextra -Werror -D_GLIBCXX_USE_CXX11_ABI=0 -fPIC)
 elseif(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-  target_compile_options(geometry PRIVATE -Wall -Wextra)
+  target_compile_options(geometry PRIVATE -Wall -Wextra -D_GLIBCXX_USE_CXX11_ABI=0 -fPIC)
 endif()
