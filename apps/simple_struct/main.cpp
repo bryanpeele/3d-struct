@@ -44,7 +44,7 @@ int main() {
   graph.AddEdge(h5, h6);
 
   magnus::geom::StructifyConfig config;
-  config.num_polygon_sides = 10;
+  config.num_polygon_sides = 6;
   config.struct_radius = 0.75;
   config.vertex_radius = 2.9;
 
@@ -65,13 +65,17 @@ int main() {
   open3d::visualization::DrawGeometries({mesh_ptr});
 
 
-  auto subdivided_mesh_ptr = mesh_ptr->SubdivideLoop(1);
+  auto subdivided_mesh_ptr = mesh_ptr->SubdivideLoop(2);
+  subdivided_mesh_ptr->ComputeVertexNormals();
   open3d::visualization::DrawGeometries({subdivided_mesh_ptr});
 
-  auto smooth_mesh_ptr = subdivided_mesh_ptr->FilterSmoothLaplacian(1, 0.5);
+  auto smooth_mesh_ptr = subdivided_mesh_ptr->FilterSmoothLaplacian(2, 0.5);
+  smooth_mesh_ptr->ComputeVertexNormals();
   open3d::visualization::DrawGeometries({smooth_mesh_ptr});
 
-
+  auto moar_subdivided_mesh_ptr = smooth_mesh_ptr->SubdivideLoop(1);
+  moar_subdivided_mesh_ptr->ComputeVertexNormals();
+  open3d::visualization::DrawGeometries({moar_subdivided_mesh_ptr});
 
   return 0;
 }
