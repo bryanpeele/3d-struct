@@ -1,3 +1,4 @@
 add_subdirectory(hello_world)
 add_subdirectory(open3d_example)
 add_subdirectory(simple_struct)
+add_subdirectory(tesselate_example)

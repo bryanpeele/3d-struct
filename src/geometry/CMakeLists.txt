@@ -1,8 +1,10 @@
 add_library(geometry SHARED
   src/graph.cpp
+  src/line_segment.cpp
   src/math_util.cpp
   src/point.cpp
   src/structify.cpp
+  src/tesselate.cpp
 )
 
 target_link_libraries(geometry

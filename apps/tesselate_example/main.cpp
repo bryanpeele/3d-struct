@@ -1,51 +1,23 @@
+#include <iostream>
+
 #include "Open3D/Open3D.h"
 
 #include "structify.h"
+#include "tesselate.h"
 
 int main() {
-  const auto p0 = magnus::geom::Point3d({0.0, 0.0, 0.0});
-  const auto p1 = magnus::geom::Point3d({9.0, 0.0, 0.0});
-  const auto p2 = magnus::geom::Point3d({9.0, 9.0, 0.0});
-  const auto p3 = magnus::geom::Point3d({0.0, 9.0, 0.0});
-  const auto p4 = magnus::geom::Point3d({4.5, 4.5, 0.0});
-  const auto p5 = magnus::geom::Point3d({4.5, 4.5, 6.0});
-  const auto p6 = magnus::geom::Point3d({4.5, 4.5, 12.0});
+  const auto tessellate = magnus::geom::Tessellate(7, 3, 6);
+  const auto lines = tessellate.Lines();
+  auto set = std::make_shared<open3d::geometry::LineSet>(lines.first,
+                                                         lines.second);
+  open3d::visualization::DrawGeometries({set});
 
-  auto graph = magnus::geom::Graph3d();
-  const auto h0 = graph.AddPoint(p0);
-  const auto h1 = graph.AddPoint(p1);
-  const auto h2 = graph.AddPoint(p2);
-  const auto h3 = graph.AddPoint(p3);
-  const auto h4 = graph.AddPoint(p4);
-  const auto h5 = graph.AddPoint(p5);
-  const auto h6 = graph.AddPoint(p6);
-
-  // Square
-  graph.AddEdge(h0, h1);
-  graph.AddEdge(h1, h2);
-  graph.AddEdge(h2, h3);
-  graph.AddEdge(h3, h0);
-
-  // X
-  graph.AddEdge(h0, h4);
-  graph.AddEdge(h1, h4);
-  graph.AddEdge(h2, h4);
-  graph.AddEdge(h3, h4);
-
-  // Pyramid
-  graph.AddEdge(h0, h5);
-  graph.AddEdge(h1, h5);
-  graph.AddEdge(h2, h5);
-  graph.AddEdge(h3, h5);
-  graph.AddEdge(h4, h5);
-
-  // Post
-  graph.AddEdge(h5, h6);
+  const auto graph = tessellate.Graph();
 
   magnus::geom::StructifyConfig config;
-  config.num_polygon_sides = 6;
-  config.struct_radius = 0.75;
-  config.vertex_radius = 2.9;
+  config.num_polygon_sides = 3;
+  config.struct_radius = 0.001;
+  config.vertex_radius = 0.001;
 
   const auto structify = magnus::geom::Structify(config, graph);
   const auto points = structify.Points();
@@ -62,7 +34,6 @@ int main() {
   mesh_ptr = std::make_shared<open3d::geometry::TriangleMesh>(mesh_ptr->MergeCloseVertices(1e-6));
 
   open3d::visualization::DrawGeometries({mesh_ptr});
-
 
   auto subdivided_mesh_ptr = mesh_ptr->SubdivideLoop(2);
   subdivided_mesh_ptr->ComputeVertexNormals();
