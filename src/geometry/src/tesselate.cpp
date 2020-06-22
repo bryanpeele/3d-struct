@@ -6,30 +6,20 @@ namespace magnus {
 namespace geom {
 
 Point2d Reflect(const LineSegment2d &line, const Point2d &point) {
-  std::cout << "l_p0: " << line.p0().x() << ", " << line.p0().y() << std::endl;
-  std::cout << "l_p1: " << line.p1().x() << ", " << line.p1().y() << std::endl;
-  std::cout << "p: " << point.x() << ", " << point.y() << std::endl;
-
   double den = line.p0().x() * line.p1().y() - line.p1().x() * line.p0().y();
   bool straight = std::abs(den) < 1e-9;  // TODO(bpeele) make sure eps makes sense...
 
   if (straight) {
     const Point2d p = line.p0();
-    std::cout << "p_copy: " << p.x() << ", " << p.y() << std::endl;
 
     den = std::sqrt((line.p0().x() - line.p1().x()) * (line.p0().x() - line.p1().x()) +
                     (line.p0().y() - line.p1().y()) * (line.p0().y() - line.p1().y()));
-
-    std::cout << "den: " << den << std::endl;
 
     const Point2d d = Point2d({(line.p1().x() - line.p0().x()) / den,
                                (line.p1().y() - line.p0().y()) / den});
 
     double factor = 2.0 * ((point.x() - p.x()) * d.x() + (point.y() - p.y()) * d.y());
 
-    std::cout << "p': " << 2.0 * p.x() + factor * d.x() - point.x() << ", "
-                        << 2.0 * p.y() + factor * d.y() - point.y() << std::endl;
-    std::cout << "=========================================" << std::endl;
     return Point2d({2.0 * p.x() + factor * d.x() - point.x(),
                     2.0 * p.y() + factor * d.y() - point.y()});
   } else {
@@ -42,10 +32,6 @@ Point2d Reflect(const LineSegment2d &line, const Point2d &point) {
     // Reflect method
     const double factor = r * r /
         ((point.x() - C.x()) * (point.x() - C.x()) + (point.y() - C.y()) * (point.y() - C.y()));
-
-    std::cout << "p'': " << C.x() + factor * (point.x() - C.x()) << ", "
-                         << C.y() + factor * (point.y() - C.y()) << std::endl;
-    std::cout << "=========================================" << std::endl;
 
     return Point2d({C.x() + factor * (point.x() - C.x()),
                     C.y() + factor * (point.y() - C.y())});
@@ -70,11 +56,19 @@ Graph3d Tessellate::Graph() const {
 
 int GetMatchOrAdd(std::vector<Eigen::Vector3d> &points, const Eigen::Vector3d &new_point) {
   for (size_t i = 0; i < points.size(); i++) {
-    if ((points[i] - new_point).norm() < 1e-9) return i;
+    if ((points[i] - new_point).norm() < 1e-6) return i;
   }
 
   points.emplace_back(new_point);
   return points.size() - 1;
+}
+
+void MaybeAddLine(std::vector<Eigen::Vector2i> &lines, int p0, int p1) {
+  for (const auto &line : lines) {
+    if (line.x() == p0 && line.y() == p1) return;
+    if (line.x() == p1 && line.y() == p0) return;
+  }
+  lines.emplace_back(p0, p1);
 }
 
 std::pair<std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector2i>> Tessellate::Lines() const {
@@ -85,7 +79,7 @@ std::pair<std::vector<Eigen::Vector3d>, std::vector<Eigen::Vector2i>> Tessellate
       const int p0 = GetMatchOrAdd(points, {polygon[i].x(), polygon[i].y(), 0.0});
       int next_i = (i + 1) % polygon.size();
       const int p1 = GetMatchOrAdd(points, {polygon[next_i].x(), polygon[next_i].y(), 0.0});
-      lines.emplace_back(p0, p1);
+      MaybeAddLine(lines, p0, p1);
     }
   }
   std::cout << "num points: " << points.size() << std::endl;
@@ -155,8 +149,6 @@ Tessellate::Polygon2d Tessellate::ConstructNextPolygon(const Polygon2d polygon, 
   if (static_cast<int>(polygon.size()) != n_) std::cout << "shit" << std::endl;
   Point2d start = polygon[side];
   Point2d end = polygon[(side + 1) % n_];
-  std::cout << "start: " << start.x() << ", " << start.y() << std::endl;
-  std::cout << "end: " << end.x() << ", " << end.y() << std::endl;
   Polygon2d next_polygon;
   for (int i = 0; i < n_; i++) next_polygon.emplace_back(Eigen::Vector2d::Zero());
   for (int i = 0; i < n_; ++i) {

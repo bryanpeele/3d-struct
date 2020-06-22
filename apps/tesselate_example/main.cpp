@@ -6,18 +6,24 @@
 #include "tesselate.h"
 
 int main() {
-  const auto tessellate = magnus::geom::Tessellate(7, 3, 6);
+  const auto tessellate = magnus::geom::Tessellate(7, 3, 5);
   const auto lines = tessellate.Lines();
   auto set = std::make_shared<open3d::geometry::LineSet>(lines.first,
                                                          lines.second);
+  std::cout << "num vertices: " << lines.first.size() << std::endl;
+  std::cout << "num edges: " << lines.second.size() << std::endl;
+
   open3d::visualization::DrawGeometries({set});
 
   const auto graph = tessellate.Graph();
 
+  std::cout << "num graph vertices: " << graph.num_points() << std::endl;
+  std::cout << "num graph edges: " << graph.num_edges() << std::endl;
+
   magnus::geom::StructifyConfig config;
-  config.num_polygon_sides = 3;
-  config.struct_radius = 0.001;
-  config.vertex_radius = 0.001;
+  config.num_polygon_sides = 6;
+  config.struct_radius = 0.25;
+  config.vertex_radius = 0.35;
 
   const auto structify = magnus::geom::Structify(config, graph);
   const auto points = structify.Points();
@@ -33,19 +39,18 @@ int main() {
   mesh_ptr->ComputeAdjacencyList();
   mesh_ptr = std::make_shared<open3d::geometry::TriangleMesh>(mesh_ptr->MergeCloseVertices(1e-6));
 
+  std::cout << "raw poly-count: " << mesh_ptr->triangles_.size() << std::endl;
   open3d::visualization::DrawGeometries({mesh_ptr});
 
   auto subdivided_mesh_ptr = mesh_ptr->SubdivideLoop(2);
   subdivided_mesh_ptr->ComputeVertexNormals();
+  std::cout << "subdivided poly-count: " << subdivided_mesh_ptr->triangles_.size() << std::endl;
   open3d::visualization::DrawGeometries({subdivided_mesh_ptr});
 
   auto smooth_mesh_ptr = subdivided_mesh_ptr->FilterSmoothLaplacian(2, 0.5);
   smooth_mesh_ptr->ComputeVertexNormals();
+  std::cout << "smooth poly-count: " << smooth_mesh_ptr->triangles_.size() << std::endl;
   open3d::visualization::DrawGeometries({smooth_mesh_ptr});
-
-  auto moar_subdivided_mesh_ptr = smooth_mesh_ptr->SubdivideLoop(1);
-  moar_subdivided_mesh_ptr->ComputeVertexNormals();
-  open3d::visualization::DrawGeometries({moar_subdivided_mesh_ptr});
 
   return 0;
 }

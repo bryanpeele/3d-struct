@@ -44,9 +44,11 @@ void Structify::AddStruct(const EdgeHandle &edge_handle) {
   const Eigen::Vector3d edge_prime = graph_.edge_vector(edge_handle).normalized();
   const auto endpoints = graph_.edge(edge_handle);
 
+  const double edge_length = (endpoints.first.coordinate() - endpoints.second.coordinate()).norm();
+  const double effective_radius = config_.vertex_radius * edge_length;
 
-  const Vector3d center0 = endpoints.first.coordinate() + config_.vertex_radius * edge_prime;
-  const Vector3d center1 = endpoints.second.coordinate() - config_.vertex_radius * edge_prime;
+  const Vector3d center0 = endpoints.first.coordinate() + effective_radius * edge_prime;
+  const Vector3d center1 = endpoints.second.coordinate() - effective_radius * edge_prime;
 
   const double angle = (2.0 * M_PI)/ static_cast<double>(config_.num_polygon_sides);
   const double half_angle = 0.5 * angle;
@@ -57,7 +59,7 @@ void Structify::AddStruct(const EdgeHandle &edge_handle) {
       IsParallel(edge_prime, Vector3d::UnitZ()) ? Vector3d::UnitX() : Vector3d::UnitZ();
 
   const Vector3d first_spoke =
-      config_.struct_radius * (edge_prime.cross(arbitrary)).normalized();
+      config_.struct_radius * edge_length * (edge_prime.cross(arbitrary)).normalized();
 
   std::vector<int> face_0;
   std::vector<int> face_1;
@@ -124,8 +126,6 @@ void Structify::AddHubs() {
     const auto tri_normal = mesh->triangle_normals_.front();
     const bool need_to_invert = center_to_first_point.dot(tri_normal) < 0.0;
 
-
-    std::cout << mesh->triangle_normals_[0].transpose() << std::endl;
     if (need_to_invert) {
       for (auto &normal : mesh->triangle_normals_) normal *= -1.0;
       for (auto &normal : mesh->vertex_normals_) normal *= -1.0;
